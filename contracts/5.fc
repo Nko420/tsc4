@@ -16,32 +16,33 @@ and a request with N = 201 and K = 4 should return a tuple
 () recv_internal() {
 }
 
-(int, int) fibonacciSolver(int currentNumber) impure inline {
- if (currentNumber == 0){
-  return (0, 1);
- }
-
- (int a, int b) = fibonacciSolver(currentNumber / 2);
- int c = a * ( b * 2 - a);
- int d =  a * a + b * b;
-
- if(currentNumber % 2 == 0){
-     return (c, d);
- }
- else {
-   return (d, c + d);
-  }
-}
-
 ;; testable
 (tuple) fibonacci_sequence (int n, int k) method_id {
- var finalTuple = empty_tuple();
- int counter = n;
- while(counter < n + k) {
-     (int nr, _) = fibonacciSolver(counter);
-    finalTuple~tpush(nr);
-    counter = counter + 1;
- }
+  tuple res = empty_tuple();
 
-return  finalTuple;
+  if(k <= 0){
+    return empty_tuple();
+  }
+
+  int i = 0;
+  int f0 = 0;
+  int f1 = 1;
+  int m = n + k;
+  while(i < m){
+    if(i >= n){
+      res~tpush(f0);
+    }
+
+    if(i + 1 != m)
+    {
+      int f0n = f1;
+      int f1n = f0 + f1;
+
+      f0 = f0n;
+      f1 = f1n;
+    }
+    i += 1;
+  }
+
+  return res;
 }
