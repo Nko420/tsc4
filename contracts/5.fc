@@ -20,8 +20,28 @@ and a request with N = 201 and K = 4 should return a tuple
 (tuple) fibonacci_sequence (int n, int k) method_id {
   tuple res = empty_tuple();
 
-  if(k <= 0){
+  if(k == 0){
     return empty_tuple();
+  }
+
+  if(n + k > 370)
+  {
+    return null();
+  }
+
+  if(n < 0)
+  {
+    return null();
+  }
+
+  if(k > 255)
+  {
+    return null();
+  }
+
+  if(k < 0)
+  {
+    return null();
   }
 
   int i = 0;
