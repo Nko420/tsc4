@@ -50,7 +50,7 @@ int tlen(tuple t) asm "TLEN";
      tempTuple~tpush(numberResult);
      rowCounter += 1;
    }
-   matrixAB~tpush(rowTuple);
+   matrixAB~tpush(tempTuple);
    columnCounter += 1;
  }
 
