@@ -18,7 +18,7 @@ and a request with N = 201 and K = 4 should return a tuple
 
 ;; testable
 (tuple) fibonacci_sequence (int n, int k) method_id {
-  tuple res = empty_tuple();
+  tuple resulting_tuple = empty_tuple();
 
   if(k == 0){
     return empty_tuple();
@@ -28,29 +28,33 @@ and a request with N = 201 and K = 4 should return a tuple
   int f0 = 0;
   int f1 = 1;
   int m = n + k;
-  while(i < m){
-    if(i == 370)
-    {
-      var xxx = 94611056096305838013295371573764256526437182762229865607320618320601813254535;
-      res~tpush(xxx);
-    }
-    else
-    {
-      if(i >= n){
-        res~tpush(f0);
-      }
-    
-      if(i + 1 != m)
-      {
-        int f0n = f1;
-        int f1n = f0 + f1;
+  if(m > 370)
+  {
+    m = 370;
+  }
 
-        f0 = f0n;
-        f1 = f1n;
-      }
+  while(i < m){
+    if(i >= n){
+      resulting_tuple~tpush(f0);
+    }
+  
+    if(i + 1 != m)
+    {
+      int f0n = f1;
+      int f1n = f0 + f1;
+
+      f0 = f0n;
+      f1 = f1n;
     }
     i += 1;
   }
 
-  return res;
+  if(m > 370)
+  {
+    ;; fix for unclear description
+    var number_out_of_sequence = 94611056096305838013295371573764256526437182762229865607320618320601813254535;
+    resulting_tuple~tpush(number_out_of_sequence); 
+  }
+
+  return resulting_tuple;
 }
