@@ -1,15 +1,53 @@
 {-
-  TASK 1 - Find branch of the cell tree
-  Write the method that will find a branch of the tree by comparing its
-  hash with the hash received in the first parameter. When the algorithm finds
-  the subtree (branch) whose hash equals the received hash, the root cell of
-  this branch should be returned. Return empty cell if the branch is not found.
+ TASK 1 - Find branch of the cell tree
+ Write the method that will find a branch of the tree by comparing its
+ hash with the hash received in the first parameter. When the algorithm finds
+ the subtree (branch) whose hash equals the received hash, the root cell of
+ this branch should be returned. Return empty cell if the branch is not found.
 -}
+
+forall X -> int null (X x) asm "ISNULL";
+forall X -> (tuple, ()) push_back (tuple tail, X head) asm "CONS";
+forall X -> (tuple, (X)) pop_back (tuple t) asm "UNCONS";
 
 () recv_internal() {
 }
 
+(cell) find_root_cell(int hash, slice tree) impure inline {
+   tuple stack = null();
+   stack~push_back(tree);
+   while (~ stack.null()) {
+       slice node = stack~pop_back();
+       repeat (node.slice_refs()) {
+           cell tree_node = node~load_ref();
+           if(~ tree_node.null())
+           {
+             if(tree_node.cell_hash() == hash)
+             {
+               return tree_node;
+             }
+
+             slice tree_node_children = tree_node.begin_parse();
+             if(tree_node_children.slice_refs())
+             {
+               cell root_node_hash = findHash(hash, tree_node_children);
+               if(~ root_node_hash.null())
+               {
+                 return root_node_hash;
+               }
+             }
+           }
+
+           stack~push_back(node);
+       }
+   }
+
+   return null();
+}
+
 ;; testable
 (cell) find_branch_by_hash(int hash, cell tree) method_id {
-  return begin_cell().end_cell();
+ cell rootCell = find_root_cell(hash, tree.begin_parse());
+
+ return rootCell;
 }
