@@ -1,21 +1,128 @@
 {-
-  TASK 4 - Caesar Cipher
-  Implement a Caesar cipher encryption and decryption functions.
-  The input is a string (https://docs.ton.org/develop/smart-contracts/guidelines/internal-messages#simple-message-with-comment)
-  where the text is encrypted in a cell (after 32bit 00000000 prefix flag), the algorithm rotates the characters and the last ASCII
-  character should go to the beginning. Return new text encoded in cell.
+ TASK 4 - Caesar Cipher
+ Implement a Caesar cipher encryption and decryption functions.
+ The input is a string (https://docs.ton.org/develop/smart-contracts/guidelines/internal-messages#simple-message-with-comment)
+ where the text is encrypted in a cell (after 32bit 00000000 prefix flag), the algorithm rotates the characters and the last ASCII
+ character should go to the beginning. Return new text encoded in cell.
 -}
+
+forall X -> int is_null (X x) asm "ISNULL";
+int tlen(tuple t) asm "TLEN";
 
 () recv_internal() {
 }
 
+(builder) encode_decode_string(slice text, int shift, builder chars, int type) inline_ref {
+ while (~ text.slice_data_empty?()) {
+    int char = text~load_uint(8);
+    if(char >= 65 & (char <= 90))
+    {
+      if(type == 1)
+      {
+        if(90 - char < shift)
+        {
+          chars~store_uint(shift + char - 36, 8);
+        }
+        else
+        {
+          chars~store_uint(char + shift, 8);
+        }
+      }
+      else
+      {
+        if(char - 65 < shift)
+        {
+          chars~store_uint(36 - shift + char, 8);
+        }
+        else
+        {
+          chars~store_uint(char - shift, 8);
+        }
+      }
+    }
+    elseif(char >= 97 & (char <= 122))
+    {
+      if(type == 1)
+      {
+        if(122 - char < shift)
+        {
+          chars~store_uint(char + shift - 26, 8);
+        }
+        else
+        {
+          chars~store_uint(char + shift, 8);
+        }
+      }
+      else
+      {
+        if(char - 97 < shift)
+        {
+          chars~store_uint(26 - shift + char, 8);
+        }
+        else
+        {
+          chars~store_uint(char - shift, 8);
+        }
+      }
+    }
+    else
+    {
+      chars~store_uint(char, 8);
+    }
+ }
+
+ return chars;
+}
+
+ (cell) retrieveCell(int sliceHasReferences, int shift, slice sliceWithRef, int type) inline_ref {
+ while (sliceHasReferences > 0) {
+   cell loadedReference = sliceWithRef~load_ref();
+   slice sliceFromReference = sliceHasReferences.begin_parse();
+   sliceHasReferences = sliceFromReference.slice_refs();
+   builder encodedStringBuilder = encode_decode_string(sliceFromReference, shift, begin_cell(), type);
+   if(sliceHasReferences > 0)
+   {
+     var referenceCell = retrieveCell(sliceHasReferences, shift, sliceFromReference, type);
+     return begin_cell().store_builder(encodedStringBuilder).store_ref(referenceCell).end_cell();
+   }
+   else
+   {
+     return begin_cell().store_builder(encodedStringBuilder).end_cell();
+   }
+ }
+
+ return begin_cell().store_slice(sliceWithRef).end_cell();
+}
+
+(cell) getCell(int shift, cell text, int type) inline_ref {
+ shift = shift % 26;
+ if(shift == 0)
+ {
+   return text;
+ }
+
+ slice loadedCell = text.begin_parse();
+ int op = loadedCell~load_uint(32);
+
+ builder chars = begin_cell();
+ chars~store_uint(0, 32);
+ chars = encode_decode_string(loadedCell, shift, chars, type);
+ int sliceHasReferences = loadedCell.slice_refs();
+ if(sliceHasReferences > 0)
+ {
+   cell cellRef = retrieveCell(sliceHasReferences, shift, loadedCell, type);
+   chars = chars.store_ref(cellRef);
+ }
+
+ return chars.end_cell();
+}
+
 ;; testable
 (cell) caesar_cipher_encrypt(int shift, cell text) method_id {
-  return begin_cell().end_cell();
+  return getCell(shift, text, 1);
 }
 
 ;; testable
 (cell) caesar_cipher_decrypt(int shift, cell text) method_id {
-  return begin_cell().end_cell();
+  return getCell(shift, text, 2);
 }
-
