@@ -95,6 +95,11 @@ return begin_cell().store_slice(sliceWithRef).end_cell();
 }
 
 (cell) getCell(int shift, cell text, int typeOfOperation) inline_ref {
+if(text.is_null())
+{
+  return begin_cell().end_cell();
+}
+
 shift = shift % 26;
 if(shift == 0)
 {
