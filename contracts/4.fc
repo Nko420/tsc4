@@ -23,7 +23,7 @@ while (~ text.slice_data_empty?()) {
        {
          if(90 - char < shift)
          {
-         chars~store_uint(shift + char - 36, 8);
+         chars~store_uint(shift + char - 26, 8);
          }
          else
          {
@@ -34,7 +34,7 @@ while (~ text.slice_data_empty?()) {
        {
          if(char - 65 < shift)
          {
-         chars~store_uint(36 - shift + char, 8);
+         chars~store_uint(26 - shift + char, 8);
          }
          else
          {
