@@ -15,55 +15,69 @@ int tlen(tuple t) asm "TLEN";
 (builder) encode_decode_string(slice text, int shift, builder chars, int typeOfOperation) inline_ref {
 while (~ text.slice_data_empty?()) {
  int char = text~load_uint(8);
- if(char >= 65 & (char <= 90))
+ if(char >= 65)
  {
-  if(typeOfOperation == 1)
-  {
-   if(90 - char < shift)
+   if(char <= 90)
    {
-    chars~store_uint(shift + char - 36, 8);
+       if(typeOfOperation == 1)
+       {
+         if(90 - char < shift)
+         {
+         chars~store_uint(shift + char - 36, 8);
+         }
+         else
+         {
+         chars~store_uint(char + shift, 8);
+         }
+       }
+       else
+       {
+         if(char - 65 < shift)
+         {
+         chars~store_uint(36 - shift + char, 8);
+         }
+         else
+         {
+         chars~store_uint(char - shift, 8);
+         }
+       }
+   }
+   elseif(char >= 97)
+   {
+     if(char <= 122)
+     {
+       if(typeOfOperation == 1)
+       {
+         if(122 - char < shift)
+         {
+         chars~store_uint(char + shift - 26, 8);
+         }
+         else
+         {
+         chars~store_uint(char + shift, 8);
+         }
+       }
+       else
+       {
+         if(char - 97 < shift)
+         {
+         chars~store_uint(26 - shift + char, 8);
+         }
+         else
+         {
+         chars~store_uint(char - shift, 8);
+         }
+       }
+     }
+     else
+     {
+       chars~store_uint(char, 8);
+     }
    }
    else
    {
-    chars~store_uint(char + shift, 8);
+     chars~store_uint(char, 8);
    }
-  }
-  else
-  {
-   if(char - 65 < shift)
-   {
-    chars~store_uint(36 - shift + char, 8);
-   }
-   else
-   {
-    chars~store_uint(char - shift, 8);
-   }
-  }
- }
- elseif(char >= 97 & (char <= 122))
- {
-  if(typeOfOperation == 1)
-  {
-   if(122 - char < shift)
-   {
-    chars~store_uint(char + shift - 26, 8);
-   }
-   else
-   {
-    chars~store_uint(char + shift, 8);
-   }
-  }
-  else
-  {
-   if(char - 97 < shift)
-   {
-    chars~store_uint(26 - shift + char, 8);
-   }
-   else
-   {
-    chars~store_uint(char - shift, 8);
-   }
-  }
  }
  else
  {
@@ -95,11 +109,6 @@ return begin_cell().store_slice(sliceWithRef).end_cell();
 }
 
 (cell) getCell(int shift, cell text, int typeOfOperation) inline_ref {
-if(text.is_null())
-{
-  return begin_cell().end_cell();
-}
-
 shift = shift % 26;
 if(shift == 0)
 {
